@@ -16,10 +16,6 @@ section below.
 
 ---
 
-![TylerSwing](docs/tylerswing.png)
-
-Sample tilings and exported PostScript are in [`examples/`](examples/).
-
 ## Table of contents
 
 - [Features](#features)
@@ -159,21 +155,6 @@ being written for 2002‑era Java — and do not affect compilation or running.
 | From compiled classes | `java Tyler` (run in the folder with the `.class` files) |
 | New window while running | press `T` |
 
-### Troubleshooting
-
-**Double-clicking the jar does nothing / uses the wrong Java.** Double-click
-launches with whatever Java your OS has associated with `.jar` files; if you have
-more than one Java installed, that may be an old or incompatible one. Running it
-from a terminal is the reliable way, because it uses the `java` on your PATH:
-
-```
-java -jar Tyler.jar
-```
-
-The jar is built for Java 11+, so any Java 11 or newer works this way. To force a
-specific one, call it by full path, e.g. `/usr/lib/jvm/java-17.../bin/java -jar Tyler.jar`.
-
-
 The program opens a drawing canvas with a control strip along the bottom and a
 column of polygon buttons on the right. Start clicking on the canvas to place
 tiles.
@@ -199,7 +180,7 @@ Along the bottom of the window:
 - **Zoom** slider — scale the view.
 - **Clear** — empty the drawing and start over.
 - **Color…**, **Default color**, **Recolor** — see [Colouring tiles](#colouring-tiles).
-- **Rhombus ×π** field + **Rhombus** checkbox — see [Rhombus tiles](#rhombus-tiles).
+- **Rhomb ×π** field + **Rhomb** — see [Rhombus tiles](#rhombus-tiles).
 
 The standalone frame also has **Save As…** and **Open…** buttons for reading and
 writing drawing files (and PostScript — see below).
@@ -261,17 +242,12 @@ Rhombi are available in **Euclidean** mode. A rhombus has four equal (unit‑len
 sides and one free parameter — its corner angle — which you enter as a rational
 number interpreted as a multiple of π:
 
-- Type an angle such as `2/5` into the **Rhombus ×π** field, then tick the
-  **Rhombus** checkbox (or just press Enter in the field). `2/5` means a corner
-  angle of `2/5 × π = 72°`. The checkbox shows whether rhombus mode is on.
-- With the box ticked, clicking (or `Space`) places rhombi with that corner
-  angle at the nearest edge, exactly like polygons.
-- Selecting any regular polygon (a polygon button or the **Poly** field), or
-  un-ticking the box, switches back to placing polygons. The checkbox stays in
-  sync, so it always reflects what a click will place.
-
-Any angle strictly between `0` and `1` works (i.e. `0 < a/b < 1`, an interior
-angle between 0 and π); an out-of-range or malformed value just beeps.
+- Type an angle such as `2/5` into the **Rhomb ×π** field and press **Rhomb**
+  (or Enter). `2/5` means a corner angle of `2/5 × π = 72°`.
+- Now clicking (or `Space`) places rhombi with that corner angle at the nearest
+  edge, exactly like polygons.
+- Selecting any regular polygon (a polygon button, or the **Poly** field)
+  switches back to placing polygons.
 
 The corner angle is the interior angle at the shared‑edge corner, so entering the
 **acute** angle or the **obtuse** angle gives the two possible orientations of
@@ -288,10 +264,8 @@ and with one another, so the two tile families can be mixed freely.
 
 ## Exporting PostScript
 
-There are two ways to export. The simplest is the **Save PostScript…** button,
-which always writes PostScript (it adds a `.ps` extension if you don't). The
-**Save As…** button writes Tyler's normal `.txt` drawing format — but if you
-type a name ending in `.ps` or `.eps` there, it writes PostScript too. The result is an
+To export, use **Save As…** and give the file a `.ps` or `.eps` extension
+(anything else still saves the normal `.txt` drawing format). The result is an
 Encapsulated PostScript file with a correct bounding box, so it prints on its own
 and also imports cleanly into other documents.
 
@@ -336,61 +310,6 @@ For example, a teal 72° rhombus with unit sides:
 The format remains backward compatible: files without these tokens load exactly
 as before, and older Tyler builds that predate them are cleanly asked to upgrade
 rather than misreading the new files.
-
-## Modern UI (Swing + FlatLaf)
-
-Tyler ships with two front ends over the same drawing engine:
-
-- **`Tyler`** — the original AWT UI (also the applet entry point).
-- **`TylerSwing`** — a modern Swing UI with a flat, themeable look via
-  [FlatLaf](https://www.formdev.com/flatlaf/), including a light/dark toggle and
-  HiDPI scaling. The canvas and all tiling logic are shared and unchanged; only
-  the surrounding controls differ.
-
-Run the modern UI:
-
-```
-javac *.java
-java TylerSwing            # or: java -jar Tyler_swing.jar
-java TylerSwing            # theme follows the OS light/dark setting automatically
-java TylerSwing -dark      # force dark   (or -light to force light)
-java TylerSwing mytiling.txt   # open a file on startup
-```
-
-**FlatLaf is optional.** If its jar isn't on the classpath, `TylerSwing` falls
-back to the JDK's built-in Nimbus look and prints a note. To get the full flat
-theme, download FlatLaf from Maven Central and put it on the classpath — the
-simplest is to save it next to the jar as `flatlaf.jar` (the jar's manifest
-already references that name), so `java -jar Tyler_swing.jar` picks it up:
-
-```
-# any recent 3.x works; save it as flatlaf.jar
-curl -L -o flatlaf.jar https://repo1.maven.org/maven2/com/formdev/flatlaf/3.4.1/flatlaf-3.4.1.jar
-java -jar Tyler_swing.jar          # now uses the FlatLaf theme
-# or explicitly on the classpath:
-java -cp "Tyler_swing.jar:flatlaf.jar" TylerSwing      # Linux/macOS
-java -cp "Tyler_swing.jar;flatlaf.jar" TylerSwing      # Windows
-```
-
-### One self-contained jar (nothing to download)
-
-To bundle FlatLaf into a single runnable jar so there's nothing to fetch at run
-time, run the included build script (needs a JDK and `curl`):
-
-```
-./make-fatjar.sh          # Linux/macOS   (make-fatjar.bat on Windows)
-java -jar Tyler.jar       # self-contained: modern UI + FlatLaf, theme follows the OS
-```
-
-The script compiles Tyler, downloads FlatLaf once from Maven Central, and merges
-everything into one `Tyler.jar` (FlatLaf's classes and theme resources included),
-with `TylerSwing` as the main class. After the first run FlatLaf is cached as
-`flatlaf.jar`, so rebuilds are offline.
-
-Implementation note: `TylerSwing` hosts the existing heavyweight `TylerPanel`
-canvas inside a `JFrame`, and both front ends talk to the canvas through the
-small `TylerHost` interface (which supplies the hyperbolic-controls and
-rhombus-sync callbacks). Nothing in the tiling engine changed.
 
 ## Notes and limitations
 
