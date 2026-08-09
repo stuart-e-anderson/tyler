@@ -1,0 +1,61 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+		<meta name="Author" content="Melinda Green">
+		<meta name="resource-type" content="document">
+		<meta name="distribution" content="global">
+		<meta name="Description" content="Applet for rapidly creating plane tilings of regular polygons">
+		<meta name="KeyWords" content="Tile,">
+		<meta name="GENERATOR" content="Mozilla/4.77 [en] (Win95; U) [Netscape]">
+		<title>Tyler Applet</title>
+	</head>
+	<body bgcolor="#33FFCC">
+		<center><h1> Tyler</h1></center>
+		<center><font size=-1>Last Modified:
+Thu Mar  6 14:38:24 PST 2003
+		</font></center>
+		<br>Click around in the applet below to see how easy it is to create interesting tilings. 
+		Please also visit the 
+		<a href="http://www.superliminal.com/geometry/tyler/gallery/">Tyler Art Gallery</a> 
+		for ideas and to see some of what is possible to create. When you want to become
+		a power user, please scroll down and read the simple instructions below.<p>
+		<applet archive=Tyler.jar codebase=. code=Tyler.class width="100%" height="75%" mayscript=true>alt="Your
+			browser understands the &lt;APPLET> tag but isn't running the applet, for
+			some reason." Your browser is completely ignoring the &lt;APPLET> tag!&nbsp;
+		</applet>
+		<ul>
+			<li>Click to place polygon of current type. New polygon will be attached to unpaired edge closest to cursor.</li>
+			<li>Shift-Click places a detached polygon at the cursor.</li>
+			<li>Space bar creates another polygon of the same type as the last one.</li>
+			<li>'u' key undoes last polygon placement.</li>
+			<li>'d' key deletes polygon closest to the cursor.</li>
+			<li>'m' key moves last placed polygon to be closest to the cursor.</li>
+			<li>'e' key extrapolates one polygon following the pattern of the last one.</li>
+			<li>'3' through '9' keys place polygons of the chosen type. (0, 1, 2 keys make 10, 11, & 12-gons)</li>
+			<li>'C' key cycles thickness of bounding circle when hyperbolic</li>
+			<li>'A' key toggles arc representation when hyperbolic (edges only, doesn't match polygon interiors yet)
+			<li>'a' key toggles antialiasing (very slow)
+			<li>'T' key opens a new Tyler window</li>
+			<li>'x','y','X','Y' keys snap closest tile, edge, or vertex to center of screen and closest neighbor to +x,+y,-x, or -y axis respectively</li>
+			<li>Arrow keys move and then axis-align the tiling</li>
+			<li>Ctrl-left-arrow and Ctrl-right-arrow rotate counterclockwise or clockwise to next axis-aligned orientation</li>
+		</ul>
+		<p><br><form action="Tyler.jar"><input type=submit VALUE="Download stand-alone version"></form>
+		This will get you an executable jar file which should run on any machine with java installed. 
+		On Windows, just save it to your machine and then just double-click to launch. 
+		On UNIX or other such obsolete platforms the command line "<b><tt>java -jar Tyler.jar</tt></b>" will likely work for you. 
+		The stand-alone version includes additional functionality to save and load drawing files 
+		so you can save your works-in-progress and edit them later. 
+		The data file format is fairly simple and can be used to move polygonal data between applications.
+
+		<p>If the program won't run, you probably do not have Java installed. 
+		The simplest way to get Java is to get the Java RTE from Sun. 
+		Simply <a href="http://java.sun.com/j2se/1.3/download.html">download the Java RTE or JDK</a> and install. 
+		Afterwards double-clicking the jar file should launch the stand-alone Tyler program.
+		<p><font size=+1><b>Written by Melinda Green and Don Hatch</b></font>
+		<p>Feel free to view the <a href="Tyler.src.zip">Java source code</a>.<br>
+		<br><a href="http://www.superliminal.com/geometry/geometry.htm">back to Geometry index</a>
+		<br><a href="http://www.superliminal.com">back to Superliminal home</a>
+	</body>
+</html>

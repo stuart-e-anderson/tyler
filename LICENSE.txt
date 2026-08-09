@@ -1,0 +1,15 @@
+Tyler — licensing note
+======================
+
+The original Tyler program is Copyright (c) 2002-2003 Melinda Green and
+Don Hatch (Superliminal Software).  See https://superliminal.com/geometry/tyler/
+
+This repository adds features on top of that original work (see CREDITS.md).
+A formal open-source license for this repository has NOT yet been chosen and
+should be decided together with the original authors.  Until a license is set,
+please treat the code as all rights reserved by the respective authors and
+contact them before redistributing.
+
+Third-party component: FlatLaf (bundled by the optional fat-jar build) is
+licensed under the Apache License 2.0 by FormDev Software GmbH.  If you
+redistribute a jar built with make-fatjar, include FlatLaf's license/NOTICE.

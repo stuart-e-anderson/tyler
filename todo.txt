@@ -1,0 +1,83 @@
+Bugs:
+    - (green) need to put class files on web site so it will run with old
+              browsers like netscape 3.04
+              that don't understand the "archive" construct
+    - (hatch) need to understand and fix Mozilla's problem
+              with applet heights being percentages!
+    - (hatch) save/reload makes quality awful-- matching edges don't
+                even match any more (I noticed this with hyperbolic,
+                not sure whether it's a hyperbolic-only bug)
+                (in fact it doesn't happen with 7,7,7,
+                but I noticed it with 4,4,6,6).
+    - (green) radio buttons don't work on mozilla/linux until window moved or resized
+    - (green) radio button labels partially obscured on mozilla/linux
+    - (hatch) server save/load dialog
+        - should only allow one of them up at once
+        - should remember login&password from one dialog invocation to another
+        - should show name of server, allow choosing
+        - failed load shouldn't clear the tiling
+        - tabbing over login or password fields shouldn't clear the file list
+        - sort file names alphabetically
+        - should probably reject strange file names and login names,
+                especially with trailing spaces (maybe strip them)
+        - needs wait cursor in all textfields
+        - needs ui hook
+        - should be integrated with local save/load
+    - (hatch) hyperbolic
+        - beep on unparseable vertex configuration and revert,
+           rather than throwing exception
+        - need mode to translate in hyperbolic space
+        - unified interface for euclidean, hyperbolic, spherical
+        - curved lines
+    - (hatch) get javac to work with multiple java files-- classpath problem?
+    - (hatch) TylerSave.php not working on superliminal.com
+    - (green)
+        Save to file "foo", it creates foo.txt.
+        Then bring up Load dialog, the textfield is initialized with "foo",
+        but try to load it and it fails because it tries the actual file name
+        "foo" and not "foo.txt".
+        I'd suggest simply refraining from trying to do the magic .txt thing.
+    - (green) fix roundoff error which puts jags in some horizontal lines.
+    - (hatch) axis-snap should affect a global rendering transform
+              instead of transforming all the vertices, to avoid
+              cumulative error
+
+Wishes:
+    - When adding a polygon, draw just the polygon instead of the whole scene
+      so it doesn't take so long on huge tilings. (Will still need to draw
+      everything when deleting.)
+    - Open file if given on command line
+    - (green) <ctrl>'q' in app version should quit the app (I think?)
+    - (hatch) javascript to show name of jar file in browser when button moused-over
+    - (hatch) toggle for computer voice saying name of each shape as it is placed
+    - Togglable vertex labels?
+    - Dump in format hedron can read?
+    - (hatch) forward browser window resizes in netscape using technique described in:
+        forward browser window resive using: http://www.javaworld.com/javaworld/javatips/jw-javatip80.html
+    - (hatch) simple warning boxes instead of System.out.println warnings for
+        various things
+    - (hatch) fix my other applets so they don't have to click to type either
+    - (hatch) investigate whether requestFocus() triggers window manager
+        transactions
+    - (green) SaveAs to support GIF or other image formats.
+    - (hatch) use 1.0 Cursor calls wherever possible
+    - (hatch) change MatrixMath.java to VecMath.java (or LinMath.java?)
+    - (hatch) use MyGraphics for all scale&translate stuff
+    - (hatch) always put origin in center of a pixel (i.e. different
+              cases for even and odd window sizes) to avoid unnecessary jags
+              in centered lines that should obviously be straight
+    - (hatch) figure out java pixel coordinate semantics (I think I'm off by
+              one or .5 or something)
+    - (hatch) implement shift-click for hyperbolic, or figure out a decent
+              way to say it's not implemented in the instructions
+    - (hatch) curved lines:
+                - thickness
+                - filling
+                - convert pixel lists to non-warbly paths (for filling)
+                - gap at 45 degrees sometimes (especially when antialiased)
+                - gap at end (try 9,9,9,9,9,9)
+    - (hatch) document Jim's-tiling notation hack
+    - (green) help window for app, advanced help window for both applet and app
+    - (hatch) should show Tyler version number in title bar or something,
+              so people can know whether a bug has been fixed
+              or feature has been added.

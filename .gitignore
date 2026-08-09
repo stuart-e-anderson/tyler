@@ -1,0 +1,17 @@
+# compiled classes
+*.class
+build_classes/
+fatjar/
+
+# dependency fetched by make-fatjar.sh (downloaded, not source)
+flatlaf.jar
+
+# build outputs (attach released jars to a GitHub Release instead of committing)
+Tyler.jar
+Tyler_swing.jar
+*.jar
+
+# editor / OS cruft
+*.orig
+*~
+.DS_Store
