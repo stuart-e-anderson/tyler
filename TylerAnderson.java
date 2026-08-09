@@ -21,7 +21,7 @@ import java.io.*;
  * @author Melinda Green
  * @author Don Hatch
  */
-public class Tyler extends Applet implements TylerHost {
+public class TylerAnderson extends Applet implements TylerHost {
     private static final int MIN_P = 3;
     private static final int MAX_P = 12;
     private static final int INITIAL_P = 5;
@@ -57,10 +57,10 @@ public class Tyler extends Applet implements TylerHost {
     public String saveAs(String fname) { return tyler_panel.saveAs(fname); }
     public void open(String fname) { tyler_panel.open(fname); }
     
-    public Tyler() {
+    public TylerAnderson() {
         this(true);
     }
-    public Tyler(boolean doFill) {
+    public TylerAnderson(boolean doFill) {
         tyler_panel.setFill(doFill);
         
         setLayout(new BorderLayout());
@@ -171,7 +171,7 @@ public class Tyler extends Applet implements TylerHost {
             public boolean action(Event e, Object what)
             {
                 Color c = javax.swing.JColorChooser.showDialog(
-                              Tyler.this, "Choose tile color",
+                              TylerAnderson.this, "Choose tile color",
                               tyler_panel.getCurrentColor());
                 if (c != null) // null => user cancelled, leave current color as is
                 {
@@ -374,7 +374,7 @@ public class Tyler extends Applet implements TylerHost {
     private static int totalFrameCount=0, activeFrameCount=0;
     
     public static void launchTylerFrame(boolean fill) {
-        final Tyler tyler = new Tyler(fill);
+        final TylerAnderson tyler = new TylerAnderson(fill);
         tyler.resize(new Dimension(700, 700));
         final Frame frame = new Frame_("Tyler - [Untitled]") {
             public boolean handleEvent(java.awt.Event event)
@@ -2560,7 +2560,7 @@ class TylerPanel extends DoubleBufferedCanvas {
                 break;
             case 'T':
                 // open a new Tyler window
-                Tyler.launchTylerFrame(true); // XXX might be cool to clone state
+                TylerAnderson.launchTylerFrame(true); // XXX might be cool to clone state
                 break;
 
             default:

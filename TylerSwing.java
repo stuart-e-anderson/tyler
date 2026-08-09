@@ -183,7 +183,7 @@ public class TylerSwing implements TylerHost
         row2.add(new JLabel("Rhombus \u00d7\u03c0:"));
         rhombusField = new JTextField("2/5", 3);
         rhombusField.addActionListener(e -> {
-            Rational ang = Tyler.parseRhombusAngle(rhombusField.getText());
+            Rational ang = TylerAnderson.parseRhombusAngle(rhombusField.getText());
             if (ang != null) { setRhombusChecked(true); canvas.setCurrentRhombus(ang); }
             else beep();
             focusCanvas();
@@ -194,7 +194,7 @@ public class TylerSwing implements TylerHost
         rhombusBox.addActionListener(e -> {
             if (syncing) return;
             if (rhombusBox.isSelected()) {
-                Rational ang = Tyler.parseRhombusAngle(rhombusField.getText());
+                Rational ang = TylerAnderson.parseRhombusAngle(rhombusField.getText());
                 if (ang != null) canvas.setCurrentRhombus(ang);
                 else { beep(); rhombusBox.setSelected(false); }
             } else
@@ -236,7 +236,7 @@ public class TylerSwing implements TylerHost
 
     private void applyPolyField()
     {
-        Rational p = Tyler.parseRationalOrBeep(polyField.getText());
+        Rational p = TylerAnderson.parseRationalOrBeep(polyField.getText());
         if (p.n > 1) {
             canvas.setCurrentP(p);               // fires rhombusOff()
             selectPolyButton(p);
