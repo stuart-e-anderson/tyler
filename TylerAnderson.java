@@ -288,12 +288,28 @@ public class TylerAnderson extends Applet implements TylerHost {
             TylerPanel.beep();
             return new Rational(-1,1);
         }
-        if (ratval.n < 3 || ratval.d % ratval.n == 0)
+        if (!isValidPolyOrStar(ratval))
         {
             TylerPanel.beep();
             return new Rational(-1,1);
         }
         return ratval;
+    }
+
+    // A tile spec n/d is drawable iff it is a regular polygon or a genuine star.
+    // Fold d and n-d together (they give the same shape) into ed = min(...):
+    //   - n < 3, or d a multiple of n            -> not a shape
+    //   - ed == 1                                -> regular polygon
+    //   - 2 <= ed and 2*ed < n                   -> star (positive tip angle)
+    //   - 2*ed == n  (e.g. 4/6, 6/3, 8/4)        -> degenerate: zero-width spikes
+    //                                               (lone/crossing lines) -> reject
+    static boolean isValidPolyOrStar(Rational p) {
+        int n = p.n;
+        if (n < 3) return false;
+        int dd = ((p.d % n) + n) % n;
+        if (dd == 0) return false;
+        int ed = Math.min(dd, n - dd);
+        return ed == 1 || 2*ed < n;
     }
 
     //
@@ -1297,9 +1313,11 @@ class TylerPanel extends DoubleBufferedCanvas {
     // since {n/d} and {n/n-d} are the same star).
     private static boolean isEuclideanStar(Rational p)
     {
-        int n = p.n, d = p.d;
-        int ed = Math.min(d, n-d);
-        return ed >= 2 && (n - 2*ed) > 0;
+        int n = p.n;
+        if (n < 5) return false;                    // no star has fewer than 5 points
+        int dd = ((p.d % n) + n) % n;
+        int ed = Math.min(dd, n - dd);
+        return ed >= 2 && 2*ed < n;                 // positive tip angle
     }
 
     //
@@ -1317,7 +1335,8 @@ class TylerPanel extends DoubleBufferedCanvas {
                                         Vector perimeterEdges)
     {
         int n  = ratio.n;
-        int ed = Math.min(ratio.d, n - ratio.d);       // {n/d} == {n/(n-d)}
+        int dd = ((ratio.d % n) + n) % n;
+        int ed = Math.min(dd, n - dd);                  // {n/d} == {n/(n-d)}
         double alpha = Math.PI * (n - 2*ed) / (double)n; // tip (outer) interior angle
         double half  = alpha/2.;
         double rOut  = Math.cos(half) + Math.sin(half)/Math.tan(Math.PI/n);

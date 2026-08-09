@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Main-Class: TylerAnderson
+Created-By: (Melinda Green, Don Hatch, 2002; additions by Stuart Anderson)
+

@@ -1,19 +1,21 @@
-# Tyler
+# TylerAnderson
 
-Tyler is an interactive program for building **tilings out of regular polygons**,
-by Melinda Green and Don Hatch (Superliminal Software, 2002–2003). Tyler has been
-extended with some extra features and forked into TylerAnderson by Stuart Anderson.
-You click near an open edge and a polygon of the currently selected type snaps
-onto it, so tilings grow edge‑to‑edge under your control. The apps work in three
-geometries — the Euclidean plane, the hyperbolic plane (drawn in the Poincaré
-disk), and the sphere — and can save and reload your work.
+**TylerAnderson** is an extended version of **Tyler**, the interactive program for
+building **tilings out of regular polygons** by Melinda Green and Don Hatch
+(Superliminal Software, 2002–2003). It is renamed to distinguish it from the
+original while keeping full credit to its authors.
 
-Project page: <https://superliminal.com/geometry/tyler/>
+You click near an open edge and a tile of the currently selected type snaps onto
+it, so tilings grow edge‑to‑edge under your control. It works in three geometries
+— the Euclidean plane, the hyperbolic plane (drawn in the Poincaré disk), and the
+sphere — and can save and reload your work.
 
-This README documents the original program together with a set of additions
-(PostScript export, per‑tile colouring, rhombus tiles, and arc‑accurate
-hyperbolic export) described in the [What's new](#whats-new-in-this-version)
-section below.
+Original Tyler project page: <https://superliminal.com/geometry/tyler/>
+
+This README documents the original program together with the additions
+(PostScript export, per‑tile colouring, rhombus tiles, unit‑edge star polygons,
+a modern Swing/FlatLaf UI, and arc‑accurate hyperbolic export) described in the
+[What's new](#whats-new-in-this-version) section below.
 
 ---
 
@@ -29,9 +31,11 @@ section below.
   - [Mouse](#mouse)
   - [Keyboard](#keyboard)
 - [Colouring tiles](#colouring-tiles)
+- [Star polygons](#star-polygons)
 - [Rhombus tiles](#rhombus-tiles)
 - [Exporting PostScript](#exporting-postscript)
 - [File format](#file-format)
+- [Modern UI (Swing + FlatLaf)](#modern-ui-swing--flatlaf)
 - [Notes and limitations](#notes-and-limitations)
 - [Credits](#credits)
 
@@ -53,7 +57,7 @@ section below.
   heritage) browser‑cookie and server save/load.
 - **Extrapolate** — repeat the last placement step to continue a pattern.
 
-The five additions below extend this without changing any existing behaviour.
+The additions below extend this without changing any existing behaviour.
 
 ---
 
@@ -76,16 +80,18 @@ The five additions below extend this without changing any existing behaviour.
    the true geodesics (arcs of circles meeting the boundary at right angles)
    rather than straight chords, so exported hyperbolic tilings are properly
    arc‑sided.
-   
-5. **Regular Star Polygon tiles.** Entering two integers separated by a forward
-   slash in the polygon text field creates a star polygon with those  parameters.
-   
-6. **Application name change.** Name changed to TylerAnderson to differentiate from
-   the original Tyler.    
 
-All additions are Euclidean‑and‑up compatible: existing tilings load unchanged,
-and older Tyler builds are cleanly told to upgrade if handed a file that uses the
-new features (the save format version was raised to `0.2.0`).
+5. **Unit‑edge star polygons (Euclidean).** Stars like `{5/2}` are built as true
+   simple, equilateral shapes, so they fill and colour and tile edge‑to‑edge with
+   the other tiles. See [Star polygons](#star-polygons).
+
+6. **Modern Swing UI with FlatLaf.** A flat, themeable interface with OS
+   light/dark auto‑detect, alongside the original AWT UI. See
+   [Modern UI](#modern-ui-swing--flatlaf).
+
+All additions are backward compatible: existing tilings load unchanged, and older
+builds are cleanly told to upgrade if handed a file that uses the new features
+(the save format version is now `0.3.0`).
 
 ---
 
@@ -130,7 +136,7 @@ From the `tyler/` source directory (the folder containing `TylerAnderson.java`):
 
 ```
 javac *.java        # compile every .java file into .class files
-java TylerAnderson  # run the program (Tyler is the class containing main())
+java TylerAnderson  # run the program (TylerAnderson is the class containing main())
 ```
 
 That is the whole edit‑build‑run cycle: change the source, `javac *.java`,
@@ -141,7 +147,7 @@ the `GalleryBuilder` utility out of the app jar):
 
 ```
 javac *.java
-jar --create --file=TylerAnderson.jar --manifest=Tyler.mf $(ls *.class | grep -v Galler)
+jar --create --file=TylerAnderson.jar --manifest=TylerAnderson.mf $(ls *.class | grep -v Galler)
 java -jar TylerAnderson.jar
 ```
 
@@ -218,7 +224,7 @@ writing drawing files (and PostScript — see below).
 | `x` `y` `X` `Y` | Snap the nearest tile/edge/vertex to centre and align its neighbour to the +x/+y/−x/−y axis |
 | Arrow keys | Slide the tiling, then axis‑align it |
 | `Ctrl`+`←` / `Ctrl`+`→` | Rotate to the next axis‑aligned orientation |
-| `T` | Open a new Tyler window |
+| `T` | Open a new TylerAnderson window |
 | `Shift`+`Ctrl`+`C` | Reinitialise (clear) the drawing |
 | `s` / `l` | Quick save / load to `polydata.txt` |
 
@@ -297,7 +303,7 @@ and with one another, so the two tile families can be mixed freely.
 
 There are two ways to export. The simplest is the **Save PostScript…** button,
 which always writes PostScript (it adds a `.ps` extension if you don't). The
-**Save As…** button writes Tyler's normal `.txt` drawing format — but if you
+**Save As…** button writes TylerAnderson's normal `.txt` drawing format — but if you
 type a name ending in `.ps` or `.eps` there, it writes PostScript too. The result is an
 Encapsulated PostScript file with a correct bounding box, so it prints on its own
 and also imports cleanly into other documents.
@@ -307,7 +313,7 @@ and also imports cleanly into other documents.
 - Tiles are filled with their on‑screen colour and outlined in black. Euclidean
   star polygons are filled (they are true simple shapes); curved-geometry stars
   are outlined but not filled, matching the display.
-- **Euclidean and spherical** tilings export with straight edges (Tyler draws
+- **Euclidean and spherical** tilings export with straight edges (TylerAnderson draws
   spherical edges as straight chords, so this matches the screen).
 - **Hyperbolic** tilings export with true geodesic edges — arcs of circles
   orthogonal to the boundary of the Poincaré disk — for both fills and outlines,
@@ -342,14 +348,14 @@ For example, a teal 72° rhombus with unit sides:
 ```
 
 The format remains backward compatible: files without these tokens load exactly
-as before, and older Tyler builds that predate them are cleanly asked to upgrade
+as before, and older builds that predate them are cleanly asked to upgrade
 rather than misreading the new files.
 
 ## Modern UI (Swing + FlatLaf)
 
-Tyler ships with two front ends over the same drawing engine:
+TylerAnderson ships with two front ends over the same drawing engine:
 
-- **`Tyler`** — the original AWT UI (also the applet entry point).
+- **`TylerAnderson`** — the AWT UI (also the applet entry point).
 - **`TylerSwing`** — a modern Swing UI with a flat, themeable look via
   [FlatLaf](https://www.formdev.com/flatlaf/), including a light/dark toggle and
   HiDPI scaling. The canvas and all tiling logic are shared and unchanged; only
@@ -359,25 +365,25 @@ Run the modern UI:
 
 ```
 javac *.java
-java TylerSwing            # or: java -jar Tyler_swing.jar
+java TylerSwing            # or: java -jar TylerAnderson.jar
 java TylerSwing            # theme follows the OS light/dark setting automatically
 java TylerSwing -dark      # force dark   (or -light to force light)
 java TylerSwing mytiling.txt   # open a file on startup
 ```
 
 **FlatLaf is optional.** If its jar isn't on the classpath, `TylerSwing` falls
-back to the JDK's built-in Nimbus look and prints a note. To get the full flat
-theme, download FlatLaf from Maven Central and put it on the classpath — the
-simplest is to save it next to the jar as `flatlaf.jar` (the jar's manifest
-already references that name), so `java -jar Tyler_swing.jar` picks it up:
+back to the JDK's built-in Nimbus look and prints a note. There are two ways to
+get the full flat theme:
+
+- Build the **self-contained jar** (below), which bundles FlatLaf — nothing else
+  to download.
+- Or, when running from compiled classes, put FlatLaf on the classpath yourself:
 
 ```
-# any recent 3.x works; save it as flatlaf.jar
+# any recent 3.x works
 curl -L -o flatlaf.jar https://repo1.maven.org/maven2/com/formdev/flatlaf/3.4.1/flatlaf-3.4.1.jar
-java -jar Tyler_swing.jar          # now uses the FlatLaf theme
-# or explicitly on the classpath:
-java -cp "Tyler_swing.jar:flatlaf.jar" TylerSwing      # Linux/macOS
-java -cp "Tyler_swing.jar;flatlaf.jar" TylerSwing      # Windows
+java -cp ".:flatlaf.jar" TylerSwing      # Linux/macOS
+java -cp ".;flatlaf.jar" TylerSwing      # Windows
 ```
 
 ### One self-contained jar (nothing to download)
@@ -387,11 +393,11 @@ time, run the included build script (needs a JDK and `curl`):
 
 ```
 ./make-fatjar.sh          # Linux/macOS   (make-fatjar.bat on Windows)
-java -jar Tyler.jar       # self-contained: modern UI + FlatLaf, theme follows the OS
+java -jar TylerAnderson.jar       # self-contained: modern UI + FlatLaf, theme follows the OS
 ```
 
-The script compiles Tyler, downloads FlatLaf once from Maven Central, and merges
-everything into one `Tyler.jar` (FlatLaf's classes and theme resources included),
+The script compiles TylerAnderson, downloads FlatLaf once from Maven Central, and merges
+everything into one `TylerAnderson.jar` (FlatLaf's classes and theme resources included),
 with `TylerSwing` as the main class. After the first run FlatLaf is cached as
 `flatlaf.jar`, so rebuilds are offline.
 
