@@ -542,6 +542,26 @@ class TylerPanel extends DoubleBufferedCanvas {
         public Rational rhombusAngle = null; // null => regular polygon; else this is a
                                              // rhombus whose corner angle at vertex 0 is
                                              // rhombusAngle*PI (Euclidean only)
+        public Rational starRatio = null;    // null => not a star; else this quad-or-more is a
+                                             // unit-edge star polygon {n/d} stored as an explicit
+                                             // simple 2n-gon (Euclidean only)
+
+        // General explicit-vertex constructor (used for rhombi and stars).  p is
+        // set to (#vertices)/1 so the rest of the pipeline -- fill, outline,
+        // perimeter, colour -- treats it as an ordinary simple polygon.  The
+        // rhombusAngle / starRatio tags (set by the caller) record the true shape
+        // so it can be saved and reloaded exactly rather than regenerated.
+        public Poly(double Xs[], double Ys[])
+        {
+            int m = Xs.length;
+            this.p = new Rational(m,1);
+            this.X = Xs;
+            this.Y = Ys;
+            double cx=0., cy=0.;
+            for (int i = 0; i < m; i++) { cx += Xs[i]; cy += Ys[i]; }
+            this.centerX = cx/m;
+            this.centerY = cy/m;
+        }
 
         // Explicit-vertex constructor, used for rhombi.  p is set to 4/1 so the
         // rest of the pipeline (fill, outline, perimeter, color) treats it as an
@@ -693,7 +713,7 @@ class TylerPanel extends DoubleBufferedCanvas {
     // Bump minor version when old program can't read new file
     // Bump major version when new program can't even read old file
     // Bump other version any time we feel like it
-    static final int myVersion[] = {0,2,0}; // 0.1.1 added optional per-tile color; 0.2.0 adds rhombi
+    static final int myVersion[] = {0,3,0}; // 0.1.1 color; 0.2.0 rhombi; 0.3.0 unit-edge star polygons
 
     public void write(PrintStream w) throws java.io.IOException {
         w.println("tyler data format " +
@@ -715,6 +735,8 @@ class TylerPanel extends DoubleBufferedCanvas {
                 w.print(" " + poly.X[i] + "," + poly.Y[i]);
             if (poly.rhombusAngle != null) // marks this quad as a rhombus, added in 0.2.0
                 w.print(" @" + poly.rhombusAngle);
+            if (poly.starRatio != null) // marks this simple 2n-gon as a star {n/d}, added in 0.3.0
+                w.print(" *" + poly.starRatio);
             if (poly.color != null) // optional, added in 0.1.1
                 w.print(" #" + colorToHex(poly.color));
             w.println();    
@@ -1038,19 +1060,29 @@ class TylerPanel extends DoubleBufferedCanvas {
             }
             // optional trailing tokens, order-independent:
             //   @a/b    -> this quad is a rhombus, corner angle (a/b)*PI (0.2.0)
+            //   *n/d    -> this simple 2n-gon is a star {n/d}            (0.3.0)
             //   #rrggbb -> explicit tile color                          (0.1.1)
             Rational rhombusAngle = null;
+            Rational starRatio = null;
             Color color = null;
             while (st.hasMoreTokens()) {
                 String tok = st.nextToken();
                 if (tok.startsWith("@"))
                     rhombusAngle = Rational.parseRational(tok.substring(1));
+                else if (tok.startsWith("*"))
+                    starRatio = Rational.parseRational(tok.substring(1));
                 else if (tok.startsWith("#"))
                     color = parseColor(tok);
             }
             Poly poly;
-            if (rhombusAngle != null)
-                poly = new Poly(rhombusAngle, Xs, Ys); // keep the exact rhombus, don't regularize
+            if (rhombusAngle != null) {
+                poly = new Poly(Xs, Ys);           // keep the exact rhombus, don't regularize
+                poly.rhombusAngle = rhombusAngle;
+            }
+            else if (starRatio != null) {
+                poly = new Poly(Xs, Ys);           // keep the exact star 2n-gon
+                poly.starRatio = starRatio;
+            }
             else
                 poly = new Poly(p, xsum/p.n, ysum/p.n, Xs[0], Ys[0],
                                 curvature);
@@ -1135,6 +1167,14 @@ class TylerPanel extends DoubleBufferedCanvas {
                                         double curvature)
     {
         //System.out.println("in addPolyAtPerimeterEdge(p="+p+",edge=(p0="+edge.x0+","+edge.y0+"  center="+edge.centerX+","+edge.centerY+" p1="+edge.x1+","+edge.y1+"),curvature="+curvature+")");
+        // A star {n/d} in the Euclidean plane is built as a true unit-edge simple
+        // 2n-gon so it fills, doesn't self-intersect, and tiles edge-to-edge.
+        // (In curved geometries we fall through to the historical chord drawing.)
+        if (curvature == 0. && isEuclideanStar(p))
+        {
+            addStarAtPerimeterEdge(p, edge, polys, perimeterEdges);
+            return;
+        }
         if (curvature == 0.) // Euclidean
         {
             double towardsPolyCenterX = edge.y1-edge.y0;
@@ -1250,6 +1290,77 @@ class TylerPanel extends DoubleBufferedCanvas {
         secondMostRecentEdge = mostRecentEdge;
         mostRecentEdge = edge;
     } // addRhombusAtPerimeterEdge
+
+    // Is p a star that we should build as a unit-edge simple 2n-gon?  A genuine
+    // star needs a step of at least 2 (d==1 or d==n-1 is an ordinary polygon)
+    // and a positive point angle (n - 2*ed > 0, where ed folds d and n-d together
+    // since {n/d} and {n/n-d} are the same star).
+    private static boolean isEuclideanStar(Rational p)
+    {
+        int n = p.n, d = p.d;
+        int ed = Math.min(d, n-d);
+        return ed >= 2 && (n - 2*ed) > 0;
+    }
+
+    //
+    // Attach a unit-edge star polygon {n/d} to a perimeter edge (Euclidean only).
+    //
+    // The star is a simple, equilateral 2n-gon: n outer points (the star tips,
+    // interior angle alpha = PI*(n-2d)/n, the same tip angle as the classic
+    // {n/d}) alternating with n inner (reflex) vertices, every edge unit length.
+    // It is placed sharing the edge and lying on the same side a polygon would,
+    // wound CCW so its free edges are oriented for neighbours to attach.
+    //
+    private void addStarAtPerimeterEdge(Rational ratio,
+                                        Edge edge,
+                                        Vector polys,
+                                        Vector perimeterEdges)
+    {
+        int n  = ratio.n;
+        int ed = Math.min(ratio.d, n - ratio.d);       // {n/d} == {n/(n-d)}
+        double alpha = Math.PI * (n - 2*ed) / (double)n; // tip (outer) interior angle
+        double half  = alpha/2.;
+        double rOut  = Math.cos(half) + Math.sin(half)/Math.tan(Math.PI/n);
+        double rIn   = Math.sin(half) / Math.sin(Math.PI/n);
+
+        // canonical star centred at the origin, CCW, interleaved outer/inner...
+        int m = 2*n;
+        double cX[] = new double[m];
+        double cY[] = new double[m];
+        for (int k = 0; k < n; k++)
+        {
+            double ao = k * 2.*Math.PI/n;          // outer vertex angle
+            double ai = (k + 0.5) * 2.*Math.PI/n;  // inner vertex angle
+            cX[2*k]   = rOut*Math.cos(ao);  cY[2*k]   = rOut*Math.sin(ao);
+            cX[2*k+1] = rIn *Math.cos(ai);  cY[2*k+1] = rIn *Math.sin(ai);
+        }
+        // Map the canonical edge outer_0->inner_0 onto the base edge as e1->e0
+        // (so the star's interior lands on the towardsPolyCenter side, matching
+        // how polygons and rhombi attach).  This is a pure rotation+translation.
+        double ax = cX[0], ay = cY[0];             // canonical outer_0 (maps to e1)
+        double vcx = cX[1]-ax, vcy = cY[1]-ay;     // canonical edge vector
+        double vtx = edge.x0-edge.x1, vty = edge.y0-edge.y1; // target: e1->e0
+        double theta = Math.atan2(vty,vtx) - Math.atan2(vcy,vcx);
+        double ct = Math.cos(theta), st = Math.sin(theta);
+
+        double Xs[] = new double[m];
+        double Ys[] = new double[m];
+        for (int i = 0; i < m; i++)
+        {
+            double dx = cX[i]-ax, dy = cY[i]-ay;
+            Xs[i] = edge.x1 + (dx*ct - dy*st);
+            Ys[i] = edge.y1 + (dx*st + dy*ct);
+        }
+
+        Poly poly = new Poly(Xs, Ys);
+        poly.starRatio = ratio;
+        poly.color = currentColor;
+        polys.addElement(poly);
+        addOrDeletePolyEdgesFromPerimeter(poly, perimeterEdges, 0., false);
+
+        secondMostRecentEdge = mostRecentEdge;
+        mostRecentEdge = edge;
+    } // addStarAtPerimeterEdge
 
     // Add whatever tile is currently selected (a rhombus if rhombus mode is on
     // and we're Euclidean, otherwise the current regular polygon) at a given
