@@ -1,9 +1,10 @@
 # Tyler
 
 Tyler is an interactive program for building **tilings out of regular polygons**,
-by Melinda Green and Don Hatch (Superliminal Software, 2002–2003).
+by Melinda Green and Don Hatch (Superliminal Software, 2002–2003). Tyler has been
+extended with some extra features and forked into TylerAnderson by Stuart Anderson.
 You click near an open edge and a polygon of the currently selected type snaps
-onto it, so tilings grow edge‑to‑edge under your control. Tyler works in three
+onto it, so tilings grow edge‑to‑edge under your control. The apps work in three
 geometries — the Euclidean plane, the hyperbolic plane (drawn in the Poincaré
 disk), and the sphere — and can save and reload your work.
 
@@ -52,7 +53,7 @@ section below.
   heritage) browser‑cookie and server save/load.
 - **Extrapolate** — repeat the last placement step to continue a pattern.
 
-The four additions below extend this without changing any existing behaviour.
+The five additions below extend this without changing any existing behaviour.
 
 ---
 
@@ -75,6 +76,12 @@ The four additions below extend this without changing any existing behaviour.
    the true geodesics (arcs of circles meeting the boundary at right angles)
    rather than straight chords, so exported hyperbolic tilings are properly
    arc‑sided.
+   
+5. **Regular Star Polygon tiles.** Entering two integers separated by a forward
+   slash in the polygon text field creates a star polygon with those  parameters.
+   
+6. **Application name change.** Name changed to TylerAnderson to differentiate from
+   the original Tyler.    
 
 All additions are Euclidean‑and‑up compatible: existing tilings load unchanged,
 and older Tyler builds are cleanly told to upgrade if handed a file that uses the
@@ -84,7 +91,7 @@ new features (the save format version was raised to `0.2.0`).
 
 ## Installation
 
-Tyler is a Java program, so you need Java installed. To check, open a terminal
+TylerAnderson is a Java program, so you need Java installed. To check, open a terminal
 (Command Prompt or PowerShell on Windows) and run:
 
 ```
@@ -102,14 +109,14 @@ command is not found, install Java first:
 Then, with the prebuilt jar:
 
 ```
-java -jar Tyler.jar
+java -jar TylerAnderson.jar
 ```
 
-On Windows you can usually just double‑click `Tyler.jar` to launch it.
+On Windows you can usually just double‑click `TylerAnderson.jar` to launch it.
 
 > **Run it as an application, not as a browser applet.** The original applet
 > entry point no longer works on modern Java; the standalone application
-> (`Tyler.jar`, or `java Tyler`) opens the same window directly and includes the
+> (`TylerAnderson.jar`, or `java TylerAnderson`) opens the same window directly and includes the
 > save/load and PostScript features.
 
 ---
@@ -119,23 +126,23 @@ On Windows you can usually just double‑click `Tyler.jar` to launch it.
 You need a **JDK** (which provides the `javac` compiler); the JRE alone is not
 enough. Confirm with `javac -version`. On Ubuntu: `sudo apt install default-jdk`.
 
-From the `tyler/` source directory (the folder containing `Tyler.java`):
+From the `tyler/` source directory (the folder containing `TylerAnderson.java`):
 
 ```
 javac *.java        # compile every .java file into .class files
-java Tyler          # run the program (Tyler is the class containing main())
+java TylerAnderson  # run the program (Tyler is the class containing main())
 ```
 
 That is the whole edit‑build‑run cycle: change the source, `javac *.java`,
-`java Tyler`.
+`java TylerAnderson`.
 
 To repackage a runnable jar the way the project's own build script does (leaving
 the `GalleryBuilder` utility out of the app jar):
 
 ```
 javac *.java
-jar --create --file=Tyler.jar --manifest=Tyler.mf $(ls *.class | grep -v Galler)
-java -jar Tyler.jar
+jar --create --file=TylerAnderson.jar --manifest=Tyler.mf $(ls *.class | grep -v Galler)
+java -jar TylerAnderson.jar
 ```
 
 On Windows the file‑list expression differs; the shipped `MakeAll.bat` does the
@@ -151,8 +158,8 @@ being written for 2002‑era Java — and do not affect compilation or running.
 
 | How | Command |
 |-----|---------|
-| Prebuilt jar | `java -jar Tyler.jar` (or double‑click on Windows) |
-| From compiled classes | `java Tyler` (run in the folder with the `.class` files) |
+| Prebuilt jar | `java -jar TylerAnderson.jar` (or double‑click on Windows) |
+| From compiled classes | `java TylerAnderson` (run in the folder with the `.class` files) |
 | New window while running | press `T` |
 
 The program opens a drawing canvas with a control strip along the bottom and a
