@@ -40,6 +40,8 @@ public class TylerSwing implements TylerHost
     private JCheckBox   darkBox;
     private JFileChooser fileChooser;
     private boolean     syncing = false; // guards programmatic control updates
+    private Color       polyFieldDefaultBg;
+    private static final Color ERROR_BG = new Color(255, 200, 200);
 
     // ---------- look & feel ----------
 
@@ -115,7 +117,14 @@ public class TylerSwing implements TylerHost
         // --- polygon selection ---
         row1.add(new JLabel("Poly:"));
         polyField = new JTextField(""+INITIAL_P, 3);
+        polyFieldDefaultBg = polyField.getBackground();
         polyField.addActionListener(e -> applyPolyField());
+        polyField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            public void insertUpdate(javax.swing.event.DocumentEvent e) { onEdit(); }
+            public void removeUpdate(javax.swing.event.DocumentEvent e) { onEdit(); }
+            public void changedUpdate(javax.swing.event.DocumentEvent e) { onEdit(); }
+            private void onEdit() { if (!syncing) clearPolyFieldError(); }
+        });
         row1.add(polyField);
         JButton apply = new JButton("Apply");
         apply.addActionListener(e -> applyPolyField());
@@ -184,7 +193,7 @@ public class TylerSwing implements TylerHost
         rhombusField = new JTextField("2/5", 3);
         rhombusField.addActionListener(e -> {
             Rational ang = TylerAnderson.parseRhombusAngle(rhombusField.getText());
-            if (ang != null) { setRhombusChecked(true); canvas.setCurrentRhombus(ang); }
+            if (ang != null) { setRhombusChecked(true); canvas.setCurrentRhombus(ang); clearPolyFieldError(); }
             else beep();
             focusCanvas();
         });
@@ -195,7 +204,7 @@ public class TylerSwing implements TylerHost
             if (syncing) return;
             if (rhombusBox.isSelected()) {
                 Rational ang = TylerAnderson.parseRhombusAngle(rhombusField.getText());
-                if (ang != null) canvas.setCurrentRhombus(ang);
+                if (ang != null) { canvas.setCurrentRhombus(ang); clearPolyFieldError(); }
                 else { beep(); rhombusBox.setSelected(false); }
             } else
                 canvas.setCurrentRhombus(null);
@@ -242,8 +251,24 @@ public class TylerSwing implements TylerHost
             selectPolyButton(p);
             if (curvField.isVisible())
                 canvas.setCurvatureBasedOn(Rational.parseRationalList(curvField.getText()));
+            clearPolyFieldError();
+        } else {
+            markPolyFieldError();                // bad or degenerate entry: reject and flag it
         }
         focusCanvas();
+    }
+
+    private void markPolyFieldError()
+    {
+        syncing = true;
+        polyField.setText("");
+        syncing = false;
+        polyField.setBackground(ERROR_BG);
+    }
+
+    private void clearPolyFieldError()
+    {
+        polyField.setBackground(polyFieldDefaultBg);
     }
 
     private void selectPolyButton(Rational p)

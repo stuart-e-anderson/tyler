@@ -35,6 +35,22 @@ public class TylerAnderson extends Applet implements TylerHost {
     private TextField rhombField;
     private Checkbox  rhombBox;
 
+    // poly text field (see the constructor); kept as a field so it can be
+    // flagged red / cleared from the various control callbacks below.
+    private TextComponent polyField;
+    private boolean polyFieldSyncing = false; // guards our own setText("") calls
+    private static final Color POLY_FIELD_ERROR_BG = new Color(255, 200, 200);
+
+    private void markPolyFieldError() {
+        polyFieldSyncing = true;
+        polyField.setText("");
+        polyFieldSyncing = false;
+        polyField.setBackground(POLY_FIELD_ERROR_BG);
+    }
+    private void clearPolyFieldError() {
+        polyField.setBackground(Color.white);
+    }
+
     // Called by the panel when a polygon becomes the current tile, so the
     // Rhombus checkbox reflects reality (unchecked == placing polygons).
     public void rhombusOff() { if (rhombBox != null) rhombBox.setState(false); }
@@ -82,17 +98,25 @@ public class TylerAnderson extends Applet implements TylerHost {
                 return true;
             }
         };
-        final TextComponent polyField = new TextField_(INITIAL_P+"", 3) { // TextComponent for Java 1.0 in which there is no TextField.setText()
+        polyField = new TextField_(INITIAL_P+"", 3) { // TextComponent for Java 1.0 in which there is no TextField.setText()
             public boolean action(Event e, Object what)
             {
                 Rational newP = parseRationalOrBeep((String)what);
                 if (newP.n > 1) {
                     tyler_panel.setCurrentP(newP);
                     polygroup.setCurrent(newP.d == 1 && newP.n >= MIN_P && newP.n <= MAX_P ? poly_sizes[newP.n] : null);
+                    clearPolyFieldError();
+                } else {
+                    markPolyFieldError();  // bad or degenerate entry: reject and flag it
                 }
                 return true;
             }
         };
+        polyField.addTextListener(new java.awt.event.TextListener() {
+            public void textValueChanged(java.awt.event.TextEvent e) {
+                if (!polyFieldSyncing) clearPolyFieldError();
+            }
+        });
         Panel poly_grid = new Panel(); // can't specify layout in ctor in 1.0
         poly_grid.setLayout(new GridLayout(MAX_P, 1));
         for(int i=MIN_P; i<=MAX_P; i++) {
@@ -152,6 +176,9 @@ public class TylerAnderson extends Applet implements TylerHost {
 
                     if (curvatureBasedOn_textfield != null)
                         tyler_panel.setCurvatureBasedOn(Rational.parseRationalList(curvatureBasedOn_textfield.getText()));
+                    clearPolyFieldError();
+                } else {
+                    markPolyFieldError();  // bad or degenerate entry: reject and flag it
                 }
                 return true;
             }
@@ -209,6 +236,7 @@ public class TylerAnderson extends Applet implements TylerHost {
                 if (ang != null) {
                     rhombBox.setState(true);              // pressing Enter turns rhombus mode on
                     tyler_panel.setCurrentRhombus(ang);
+                    clearPolyFieldError();
                 } else
                     getToolkit().beep();
                 return true;
@@ -219,9 +247,10 @@ public class TylerAnderson extends Applet implements TylerHost {
             {
                 if (getState()) {
                     Rational ang = parseRhombusAngle(rhombField.getText());
-                    if (ang != null)
+                    if (ang != null) {
                         tyler_panel.setCurrentRhombus(ang);   // place rhombi
-                    else {
+                        clearPolyFieldError();
+                    } else {
                         getToolkit().beep();
                         setState(false);                      // bad angle -> stay off
                     }
@@ -299,17 +328,28 @@ public class TylerAnderson extends Applet implements TylerHost {
     // A tile spec n/d is drawable iff it is a regular polygon or a genuine star.
     // Fold d and n-d together (they give the same shape) into ed = min(...):
     //   - n < 3, or d a multiple of n            -> not a shape
-    //   - ed == 1                                -> regular polygon
-    //   - 2 <= ed and 2*ed < n                   -> star (positive tip angle)
     //   - 2*ed == n  (e.g. 4/6, 6/3, 8/4)        -> degenerate: zero-width spikes
     //                                               (lone/crossing lines) -> reject
+    //   - gcd(n, ed) != 1  (e.g. 6/2, 8/2, 9/3)  -> degenerate: n and the step must
+    //                                               be coprime, per the Schlafli
+    //                                               symbol {n/d} definition on
+    //                                               Wikipedia's "star polygon" page --
+    //                                               otherwise the "star" is really a
+    //                                               compound of several smaller
+    //                                               polygons, not a single path -> reject
     static boolean isValidPolyOrStar(Rational p) {
         int n = p.n;
         if (n < 3) return false;
         int dd = ((p.d % n) + n) % n;
         if (dd == 0) return false;
         int ed = Math.min(dd, n - dd);
-        return ed == 1 || 2*ed < n;
+        if (2*ed == n) return false;
+        return gcd(n, ed) == 1;
+    }
+
+    private static int gcd(int a, int b) {
+        while (b != 0) { int t = b; b = a % b; a = t; }
+        return a;
     }
 
     //
@@ -1190,6 +1230,19 @@ class TylerPanel extends DoubleBufferedCanvas {
         {
             addStarAtPerimeterEdge(p, edge, polys, perimeterEdges);
             return;
+        }
+        // {n/d} and {n/1} are the same regular polygon whenever d==1 or
+        // d==n-1 (going around backwards doesn't change a symmetric shape).
+        // Fold to n/1 in that case so the p.toDouble() radius formulas below
+        // see a plain n-gon instead of a fraction like 6/5==1.2, which would
+        // flip the polygon to the wrong side of the edge and mis-size it.
+        // Genuine stars (ed >= 2, handled below via the p.toDouble() chord
+        // trick in curved geometries) are left untouched.
+        {
+            int n = p.n;
+            int dd = ((p.d % n) + n) % n;
+            int ed = Math.min(dd, n - dd);
+            if (ed == 1) p = new Rational(n, 1);
         }
         if (curvature == 0.) // Euclidean
         {
