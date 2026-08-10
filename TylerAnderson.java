@@ -328,28 +328,28 @@ public class TylerAnderson extends Applet implements TylerHost {
     // A tile spec n/d is drawable iff it is a regular polygon or a genuine star.
     // Fold d and n-d together (they give the same shape) into ed = min(...):
     //   - n < 3, or d a multiple of n            -> not a shape
+    //   - ed == 1                                -> regular polygon
+    //   - 2 <= ed and 2*ed < n                   -> star (positive tip angle)
     //   - 2*ed == n  (e.g. 4/6, 6/3, 8/4)        -> degenerate: zero-width spikes
     //                                               (lone/crossing lines) -> reject
-    //   - gcd(n, ed) != 1  (e.g. 6/2, 8/2, 9/3)  -> degenerate: n and the step must
-    //                                               be coprime, per the Schlafli
-    //                                               symbol {n/d} definition on
-    //                                               Wikipedia's "star polygon" page --
-    //                                               otherwise the "star" is really a
-    //                                               compound of several smaller
-    //                                               polygons, not a single path -> reject
+    //
+    // Note this deliberately does NOT require gcd(n,ed)==1. The classic {n/d}
+    // Schlafli symbol requires that for its "connect every d-th vertex of a
+    // convex n-gon" construction, since gcd(n,d)>1 traces only a sub-polygon
+    // and needs several copies (a compound, e.g. hexagram = 2 triangles) to
+    // reach every vertex. This app's star tiles (addStarAtPerimeterEdge) use a
+    // different construction -- n outer tips + n inner reflex vertices placed
+    // directly from n and the tip angle -- which is already a single simple
+    // (non-self-intersecting) polygon for any ed in [2, n/2), regardless of
+    // gcd(n,ed). So e.g. 6/2 is a genuine, fillable 6-pointed star here, not a
+    // degenerate compound -- only the zero-width case (2*ed==n) is rejected.
     static boolean isValidPolyOrStar(Rational p) {
         int n = p.n;
         if (n < 3) return false;
         int dd = ((p.d % n) + n) % n;
         if (dd == 0) return false;
         int ed = Math.min(dd, n - dd);
-        if (2*ed == n) return false;
-        return gcd(n, ed) == 1;
-    }
-
-    private static int gcd(int a, int b) {
-        while (b != 0) { int t = b; b = a % b; a = t; }
-        return a;
+        return ed == 1 || 2*ed < n;
     }
 
     //
